@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "toronto-badminton-dropin",
+  "account_id": "76d4751323092c93a2339ef81aba2bab",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-07-05",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "toronto-badminton-dropin"
+    }
+  ]
+}
