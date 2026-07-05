@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { BadmintonSession, TimeOfDay } from "@/lib/toronto-api";
+import { buildFilterQueryString, FilterParams } from "@/lib/filter-params";
 import ProgramCard from "./ProgramCard";
 
 const TIME_OF_DAY_LABELS: Record<TimeOfDay, string> = {
@@ -24,9 +26,14 @@ function toggle<T>(set: Set<T>, value: T): Set<T> {
 
 export default function FilterableSessionList({
   sessions,
+  initialFilters,
 }: {
   sessions: BadmintonSession[];
+  initialFilters: FilterParams;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const districts = useMemo(
     () => Array.from(new Set(sessions.map((s) => s.location.district))).sort(),
     [sessions]
@@ -37,12 +44,35 @@ export default function FilterableSessionList({
   );
 
   const [selectedDistricts, setSelectedDistricts] = useState<Set<string>>(
-    new Set()
+    () => new Set(initialFilters.zone)
   );
-  const [selectedAges, setSelectedAges] = useState<Set<string>>(new Set());
+  const [selectedAges, setSelectedAges] = useState<Set<string>>(
+    () => new Set(initialFilters.age)
+  );
   const [selectedTimes, setSelectedTimes] = useState<Set<TimeOfDay>>(
-    new Set()
+    () => new Set(initialFilters.time)
   );
+
+  function updateFilters(next: {
+    time?: Set<TimeOfDay>;
+    age?: Set<string>;
+    zone?: Set<string>;
+  }) {
+    const time = next.time ?? selectedTimes;
+    const age = next.age ?? selectedAges;
+    const zone = next.zone ?? selectedDistricts;
+
+    if (next.time) setSelectedTimes(next.time);
+    if (next.age) setSelectedAges(next.age);
+    if (next.zone) setSelectedDistricts(next.zone);
+
+    const qs = buildFilterQueryString({
+      time: Array.from(time),
+      age: Array.from(age),
+      zone: Array.from(zone),
+    });
+    router.replace(`${pathname}${qs}`, { scroll: false });
+  }
 
   const filtered = sessions.filter((s) => {
     if (selectedDistricts.size > 0 && !selectedDistricts.has(s.location.district))
@@ -68,11 +98,13 @@ export default function FilterableSessionList({
             <h2 className="font-semibold text-gray-900">Filters</h2>
             {hasActiveFilters && (
               <button
-                onClick={() => {
-                  setSelectedDistricts(new Set());
-                  setSelectedAges(new Set());
-                  setSelectedTimes(new Set());
-                }}
+                onClick={() =>
+                  updateFilters({
+                    time: new Set(),
+                    age: new Set(),
+                    zone: new Set(),
+                  })
+                }
                 className="text-sm text-emerald-700 hover:underline"
               >
                 Clear
@@ -89,7 +121,9 @@ export default function FilterableSessionList({
                 <input
                   type="checkbox"
                   checked={selectedTimes.has(tod)}
-                  onChange={() => setSelectedTimes((prev) => toggle(prev, tod))}
+                  onChange={() =>
+                    updateFilters({ time: toggle(selectedTimes, tod) })
+                  }
                   className="h-4 w-4 rounded border-gray-300 text-emerald-600"
                 />
                 {TIME_OF_DAY_LABELS[tod]}
@@ -106,7 +140,9 @@ export default function FilterableSessionList({
                 <input
                   type="checkbox"
                   checked={selectedAges.has(age)}
-                  onChange={() => setSelectedAges((prev) => toggle(prev, age))}
+                  onChange={() =>
+                    updateFilters({ age: toggle(selectedAges, age) })
+                  }
                   className="h-4 w-4 rounded border-gray-300 text-emerald-600"
                 />
                 {age}
@@ -123,7 +159,9 @@ export default function FilterableSessionList({
                 <input
                   type="checkbox"
                   checked={selectedDistricts.has(district)}
-                  onChange={() => setSelectedDistricts((prev) => toggle(prev, district))}
+                  onChange={() =>
+                    updateFilters({ zone: toggle(selectedDistricts, district) })
+                  }
                   className="h-4 w-4 rounded border-gray-300 text-emerald-600"
                 />
                 {district}
