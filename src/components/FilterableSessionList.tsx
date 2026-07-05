@@ -1,10 +1,22 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { BadmintonSession, TimeOfDay } from "@/lib/toronto-api";
 import { buildFilterQueryString, FilterParams } from "@/lib/filter-params";
 import ProgramCard from "./ProgramCard";
+
+const SessionsMap = dynamic(() => import("./SessionsMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[600px] w-full items-center justify-center rounded-lg border border-black/10 bg-white text-gray-500">
+      Loading map…
+    </div>
+  ),
+});
+
+type ViewMode = "list" | "map";
 
 const TIME_OF_DAY_LABELS: Record<TimeOfDay, string> = {
   morning: "Morning",
@@ -52,6 +64,7 @@ export default function FilterableSessionList({
   const [selectedTimes, setSelectedTimes] = useState<Set<TimeOfDay>>(
     () => new Set(initialFilters.time)
   );
+  const [view, setView] = useState<ViewMode>("list");
 
   function updateFilters(next: {
     time?: Set<TimeOfDay>;
@@ -171,22 +184,52 @@ export default function FilterableSessionList({
         </div>
       </aside>
 
-      <div className="space-y-8">
-        {grouped.length === 0 && (
+      <div className="space-y-6">
+        <div className="inline-flex rounded-md border border-black/10 bg-white p-1">
+          <button
+            onClick={() => setView("list")}
+            className={`rounded px-3 py-1 text-sm font-medium ${
+              view === "list"
+                ? "bg-emerald-600 text-white"
+                : "text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            List
+          </button>
+          <button
+            onClick={() => setView("map")}
+            className={`rounded px-3 py-1 text-sm font-medium ${
+              view === "map"
+                ? "bg-emerald-600 text-white"
+                : "text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            Map
+          </button>
+        </div>
+
+        {filtered.length === 0 && (
           <p className="text-gray-500">No badminton drop-in sessions match your filters.</p>
         )}
-        {grouped.map(({ tod, sessions: groupSessions }) => (
-          <section key={tod}>
-            <h2 className="mb-3 text-lg font-semibold text-gray-900">
-              {TIME_OF_DAY_LABELS[tod]}
-            </h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {groupSessions.map((session) => (
-                <ProgramCard key={session.id} session={session} />
-              ))}
-            </div>
-          </section>
-        ))}
+
+        {filtered.length > 0 && view === "map" && <SessionsMap sessions={filtered} />}
+
+        {filtered.length > 0 && view === "list" && (
+          <div className="space-y-8">
+            {grouped.map(({ tod, sessions: groupSessions }) => (
+              <section key={tod}>
+                <h2 className="mb-3 text-lg font-semibold text-gray-900">
+                  {TIME_OF_DAY_LABELS[tod]}
+                </h2>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {groupSessions.map((session) => (
+                    <ProgramCard key={session.id} session={session} />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

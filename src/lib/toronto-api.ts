@@ -1,6 +1,7 @@
 const CKAN_BASE = "https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/action";
 const DROPIN_RESOURCE_ID = "c99ec04f-4540-482c-9ee4-efb38774eab4";
 const LOCATIONS_RESOURCE_ID = "f23ac1ad-6f46-4b59-811f-eb34be9b1f7a";
+const FACILITIES_GEO_RESOURCE_ID = "e8cd0f4d-4910-42a0-81f9-cf8c2218753a";
 
 interface DatastoreSearchResponse<T> {
   success: boolean;
@@ -41,6 +42,11 @@ interface LocationRecord {
   "Postal Code": string;
 }
 
+interface FacilityGeoRecord {
+  LOCATIONID: string;
+  geometry: string;
+}
+
 export type TimeOfDay = "morning" | "afternoon" | "evening";
 
 export interface BadmintonSession {
@@ -61,6 +67,8 @@ export interface BadmintonSession {
     district: string;
     address: string;
     mapUrl: string;
+    lat: number | null;
+    lng: number | null;
   };
 }
 
@@ -109,6 +117,34 @@ function formatAddress(loc: LocationRecord): string {
   return parts.join(" ");
 }
 
+async function getFacilityCoordinates(
+  locationIds: number[]
+): Promise<Map<number, { lat: number; lng: number }>> {
+  const records = await datastoreSearch<FacilityGeoRecord>(
+    FACILITIES_GEO_RESOURCE_ID,
+    {
+      filters: JSON.stringify({
+        LOCATIONID: locationIds.map((id) => String(id)),
+      }),
+      limit: String(locationIds.length),
+    }
+  );
+
+  const coordsById = new Map<number, { lat: number; lng: number }>();
+  for (const record of records) {
+    try {
+      const geometry = JSON.parse(record.geometry) as {
+        coordinates: [number, number];
+      };
+      const [lng, lat] = geometry.coordinates;
+      coordsById.set(Number(record.LOCATIONID), { lat, lng });
+    } catch {
+      // Skip records with malformed geometry
+    }
+  }
+  return coordsById;
+}
+
 export async function getBadmintonSessions(
   date: string
 ): Promise<BadmintonSession[]> {
@@ -141,6 +177,8 @@ export async function getBadmintonSessions(
     locationRecords.map((loc) => [loc["Location ID"], loc])
   );
 
+  const coordsById = await getFacilityCoordinates(locationIds);
+
   const sessions: BadmintonSession[] = dropInRecords
     .map((record) => {
       const loc = locationsById.get(record["Location ID"]);
@@ -148,6 +186,7 @@ export async function getBadmintonSessions(
 
       const address = formatAddress(loc);
       const mapQuery = encodeURIComponent(`${loc["Location Name"]} ${address} Toronto`);
+      const coords = coordsById.get(loc["Location ID"]) ?? null;
 
       const session: BadmintonSession = {
         id: `${record.Course_ID}-${record["First Date"]}-${record["Start Hour"]}${record["Start Minute"]}`,
@@ -167,6 +206,8 @@ export async function getBadmintonSessions(
           district: loc.District,
           address,
           mapUrl: `https://www.google.com/maps/search/?api=1&query=${mapQuery}`,
+          lat: coords?.lat ?? null,
+          lng: coords?.lng ?? null,
         },
       };
       return session;
