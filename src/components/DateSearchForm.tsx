@@ -14,15 +14,15 @@ export default function DateSearchForm() {
         e.preventDefault();
         router.push(`/programs/badminton/${date}`);
       }}
-      className="flex flex-col gap-2 rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-900/10 sm:flex-row"
+      className="flex flex-col gap-2 rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-900/10 sm:flex-row dark:bg-slate-900 dark:ring-white/15"
     >
       <label className="flex flex-1 items-center gap-3 rounded-xl px-4 py-2.5">
-        <span className="text-sm font-medium text-slate-400">Date</span>
+        <span className="text-sm font-medium text-slate-400 dark:text-slate-500">Date</span>
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full bg-transparent font-medium text-slate-900 outline-none"
+          className="w-full bg-transparent font-medium text-slate-900 outline-none dark:text-white dark:[color-scheme:dark]"
         />
       </label>
       <button

@@ -67,6 +67,7 @@ export interface BadmintonSession {
     district: string;
     address: string;
     mapUrl: string;
+    siteUrl: string;
     lat: number | null;
     lng: number | null;
   };
@@ -213,6 +214,7 @@ export async function getBadmintonSessions(
           district: normalizeDistrict(loc.District),
           address,
           mapUrl: `https://www.google.com/maps/search/?api=1&query=${mapQuery}`,
+          siteUrl: `https://www.toronto.ca/explore-enjoy/parks-recreation/places-spaces/parks-and-recreation-facilities/location/?id=${loc["Location ID"]}`,
           lat: coords?.lat ?? null,
           lng: coords?.lng ?? null,
         },

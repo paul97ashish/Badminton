@@ -18,6 +18,13 @@ const markerIcon = new L.Icon({
 
 const TORONTO_CENTER: [number, number] = [43.6532, -79.3832];
 
+// Open on hover for mouse users; default click behaviour still covers touch.
+// No mouseout close — the popup must stay open so its venue link is clickable,
+// and Leaflet auto-closes it when another marker's popup opens.
+const hoverHandlers = {
+  mouseover: (e: L.LeafletMouseEvent) => (e.target as L.Marker).openPopup(),
+};
+
 export default function SessionsMap({
   sessions,
 }: {
@@ -33,48 +40,60 @@ export default function SessionsMap({
 
   if (byLocation.size === 0) {
     return (
-      <p className="text-slate-500">
+      <p className="text-slate-500 dark:text-slate-400">
         No mappable locations for the current filters.
       </p>
     );
   }
 
   return (
-    <div className="isolate overflow-hidden rounded-xl border border-slate-900/10 shadow-sm">
+    <div className="isolate overflow-hidden rounded-xl border border-slate-900/10 shadow-sm dark:border-white/10">
       <MapContainer
         center={TORONTO_CENTER}
         zoom={11}
         scrollWheelZoom
         style={{ height: "600px", width: "100%" }}
       >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {Array.from(byLocation.entries()).map(([locationId, group]) => {
-        const { lat, lng, name, district } = group[0].location;
-        return (
-          <Marker key={locationId} position={[lat as number, lng as number]} icon={markerIcon}>
-            <Popup>
-              <p className="font-semibold">{name}</p>
-              <p className="text-sm text-gray-600">{district}</p>
-              <ul className="mt-1 space-y-0.5 text-sm">
-                {group.map((session) => (
-                  <li key={session.id}>
-                    {formatTimeRange(
-                      session.startHour,
-                      session.startMinute,
-                      session.endHour,
-                      session.endMinute
-                    )}{" "}
-                    · {session.ageLabel}
-                  </li>
-                ))}
-              </ul>
-            </Popup>
-          </Marker>
-        );
-      })}
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {Array.from(byLocation.entries()).map(([locationId, group]) => {
+          const { lat, lng, name, district, siteUrl } = group[0].location;
+          return (
+            <Marker
+              key={locationId}
+              position={[lat as number, lng as number]}
+              icon={markerIcon}
+              eventHandlers={hoverHandlers}
+            >
+              <Popup>
+                <a
+                  href={siteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold hover:underline"
+                >
+                  {name}
+                </a>
+                <p className="text-sm opacity-70">{district}</p>
+                <ul className="mt-1 space-y-0.5 text-sm">
+                  {group.map((session) => (
+                    <li key={session.id}>
+                      {formatTimeRange(
+                        session.startHour,
+                        session.startMinute,
+                        session.endHour,
+                        session.endMinute
+                      )}{" "}
+                      · {session.ageLabel}
+                    </li>
+                  ))}
+                </ul>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );

@@ -1,9 +1,12 @@
 import { TimeOfDay } from "./toronto-api";
 
+export type ViewMode = "list" | "map";
+
 export interface FilterParams {
   time: TimeOfDay[];
   age: string[];
   zone: string[];
+  view: ViewMode;
 }
 
 const VALID_TIMES: TimeOfDay[] = ["morning", "afternoon", "evening"];
@@ -22,7 +25,8 @@ export function parseFilterParams(searchParams: {
   );
   const age = parseList(searchParams.age);
   const zone = parseList(searchParams.zone);
-  return { time, age, zone };
+  const view = searchParams.view === "map" ? "map" : "list";
+  return { time, age, zone, view };
 }
 
 export function buildFilterQueryString(filters: FilterParams): string {
@@ -30,6 +34,7 @@ export function buildFilterQueryString(filters: FilterParams): string {
   if (filters.time.length > 0) params.set("time", filters.time.join(","));
   if (filters.age.length > 0) params.set("age", filters.age.join(","));
   if (filters.zone.length > 0) params.set("zone", filters.zone.join(","));
+  if (filters.view === "map") params.set("view", "map");
   const qs = params.toString();
   return qs ? `?${qs}` : "";
 }

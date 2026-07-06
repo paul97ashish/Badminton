@@ -9,6 +9,9 @@ import {
 
 const STRIP_OFFSETS = [-2, -1, 0, 1, 2, 3, 4];
 
+const ARROW_CLASSES =
+  "flex h-12 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-900/10 bg-white text-slate-500 shadow-sm transition hover:border-emerald-500/50 hover:text-emerald-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-emerald-400/50 dark:hover:text-emerald-400";
+
 export default function DateNav({
   date,
   filterQueryString,
@@ -20,21 +23,24 @@ export default function DateNav({
 
   return (
     <div className="mb-8">
-      <p className="text-sm text-slate-500">
-        <Link href="/" className="hover:text-emerald-700 hover:underline">
+      <p className="text-sm text-slate-500 dark:text-slate-400">
+        <Link
+          href="/"
+          className="hover:text-emerald-700 hover:underline dark:hover:text-emerald-400"
+        >
           Programs
         </Link>
-        <span className="mx-1.5 text-slate-300">/</span>
+        <span className="mx-1.5 text-slate-300 dark:text-slate-600">/</span>
         Badminton
       </p>
       <div className="mt-1 flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
-        <h1 className="font-display text-3xl font-bold tracking-tight text-slate-900">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
           {formatDateLong(date)}
         </h1>
         {date !== today && (
           <Link
             href={`/programs/badminton/${today}${filterQueryString}`}
-            className="text-sm font-semibold text-emerald-700 hover:underline"
+            className="text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-400"
           >
             Jump to today →
           </Link>
@@ -45,7 +51,7 @@ export default function DateNav({
         <Link
           href={`/programs/badminton/${addDays(date, -1)}${filterQueryString}`}
           aria-label="Previous day"
-          className="flex h-12 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-900/10 bg-white text-slate-500 shadow-sm transition hover:border-emerald-500/50 hover:text-emerald-700"
+          className={ARROW_CLASSES}
         >
           ←
         </Link>
@@ -62,12 +68,14 @@ export default function DateNav({
                 className={`flex min-w-[3.5rem] flex-1 flex-col items-center rounded-lg border px-2 py-1.5 transition sm:min-w-[4rem] ${
                   isSelected
                     ? "border-emerald-600 bg-emerald-600 text-white shadow"
-                    : "border-slate-900/10 bg-white text-slate-600 shadow-sm hover:border-emerald-500/50 hover:text-emerald-700"
+                    : "border-slate-900/10 bg-white text-slate-600 shadow-sm hover:border-emerald-500/50 hover:text-emerald-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-emerald-400/50 dark:hover:text-emerald-400"
                 }`}
               >
                 <span
                   className={`text-[11px] font-medium uppercase tracking-wide ${
-                    isSelected ? "text-emerald-100" : "text-slate-400"
+                    isSelected
+                      ? "text-emerald-100"
+                      : "text-slate-400 dark:text-slate-500"
                   }`}
                 >
                   {isToday ? "Today" : formatWeekdayShort(d)}
@@ -82,7 +90,7 @@ export default function DateNav({
         <Link
           href={`/programs/badminton/${addDays(date, 1)}${filterQueryString}`}
           aria-label="Next day"
-          className="flex h-12 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-900/10 bg-white text-slate-500 shadow-sm transition hover:border-emerald-500/50 hover:text-emerald-700"
+          className={ARROW_CLASSES}
         >
           →
         </Link>

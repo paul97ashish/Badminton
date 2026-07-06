@@ -71,15 +71,15 @@ export default function Home() {
           {FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className="rounded-xl border border-slate-900/10 bg-white p-6 shadow-sm"
+              className="rounded-xl border border-slate-900/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-slate-900"
             >
               <span className="text-2xl" aria-hidden>
                 {feature.icon}
               </span>
-              <h2 className="mt-3 font-display font-bold text-slate-900">
+              <h2 className="mt-3 font-display font-bold text-slate-900 dark:text-white">
                 {feature.title}
               </h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                 {feature.body}
               </p>
             </div>
