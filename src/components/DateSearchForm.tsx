@@ -2,22 +2,42 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { SPORTS } from "@/lib/sports";
 import { todayDateString } from "@/lib/format";
 
 export default function DateSearchForm() {
   const router = useRouter();
   const [date, setDate] = useState(todayDateString());
+  const [sport, setSport] = useState("badminton");
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        router.push(`/programs/badminton/${date}`);
+        router.push(`/programs/${sport}/${date}`);
       }}
       className="flex flex-col gap-2 rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-900/10 sm:flex-row dark:bg-slate-900 dark:ring-white/15"
     >
-      <label className="flex flex-1 items-center gap-3 rounded-xl px-4 py-2.5">
-        <span className="text-sm font-medium text-slate-400 dark:text-slate-500">Date</span>
+      <label className="flex flex-1 items-center gap-2 rounded-xl px-3 py-2.5">
+        <span className="text-sm font-medium text-slate-400 dark:text-slate-500">
+          Sport
+        </span>
+        <select
+          value={sport}
+          onChange={(e) => setSport(e.target.value)}
+          className="w-full bg-transparent font-medium text-slate-900 outline-none dark:text-white dark:[color-scheme:dark]"
+        >
+          {SPORTS.map((s) => (
+            <option key={s.slug} value={s.slug}>
+              {s.emoji} {s.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="flex flex-1 items-center gap-2 rounded-xl px-3 py-2.5">
+        <span className="text-sm font-medium text-slate-400 dark:text-slate-500">
+          Date
+        </span>
         <input
           type="date"
           value={date}

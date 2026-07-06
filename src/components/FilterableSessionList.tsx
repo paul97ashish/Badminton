@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { BadmintonSession, TimeOfDay } from "@/lib/toronto-api";
+import { DropInSession, TimeOfDay } from "@/lib/toronto-api";
 import {
   buildFilterQueryString,
   FilterParams,
@@ -74,9 +74,11 @@ function FilterOption({
 export default function FilterableSessionList({
   sessions,
   initialFilters,
+  sportName,
 }: {
-  sessions: BadmintonSession[];
+  sessions: DropInSession[];
   initialFilters: FilterParams;
+  sportName: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -143,7 +145,7 @@ export default function FilterableSessionList({
   const hasActiveFilters =
     selectedDistricts.size > 0 || selectedAges.size > 0 || selectedTimes.size > 0;
 
-  const countBy = (predicate: (s: BadmintonSession) => boolean) =>
+  const countBy = (predicate: (s: DropInSession) => boolean) =>
     sessions.filter(predicate).length;
 
   return (
@@ -259,7 +261,7 @@ export default function FilterableSessionList({
         )}
 
         {filtered.length > 0 && view === "map" && (
-          <SessionsMap sessions={filtered} />
+          <SessionsMap sessions={filtered} sportName={sportName} />
         )}
 
         {filtered.length > 0 && view === "list" && (
@@ -280,7 +282,7 @@ export default function FilterableSessionList({
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {groupSessions.map((session) => (
-                    <ProgramCard key={session.id} session={session} />
+                    <ProgramCard key={session.id} session={session} sportName={sportName} />
                   ))}
                 </div>
               </section>

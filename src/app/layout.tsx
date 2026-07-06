@@ -15,9 +15,9 @@ const grotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Toronto Badminton Drop-in | Community Centre Programs",
+  title: "Toronto Drop-in Sports | Community Centre Programs",
   description:
-    "Find badminton drop-in programs at Toronto community centres, by date, zone, and age group.",
+    "Find drop-in sports and activities at Toronto community centres — badminton, basketball, swimming, pickleball and more — by date, zone, and age group.",
 };
 
 export default function RootLayout({

@@ -1,7 +1,14 @@
-import { BadmintonSession } from "@/lib/toronto-api";
+import { DropInSession } from "@/lib/toronto-api";
 import { formatAgeCompact, formatTimeRange } from "@/lib/format";
 
-export default function ProgramCard({ session }: { session: BadmintonSession }) {
+export default function ProgramCard({
+  session,
+  sportName,
+}: {
+  session: DropInSession;
+  sportName: string;
+}) {
+  const variant = session.courseTitle !== sportName ? session.courseTitle : null;
   return (
     <div className="group flex flex-col rounded-xl border border-slate-900/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-500/50 hover:shadow-md dark:border-white/10 dark:bg-slate-900 dark:hover:border-emerald-400/50">
       <div className="flex items-start justify-between gap-3">
@@ -20,6 +27,12 @@ export default function ProgramCard({ session }: { session: BadmintonSession }) 
           {formatAgeCompact(session.ageMin, session.ageMax)}
         </span>
       </div>
+
+      {variant && (
+        <p className="mt-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+          {variant}
+        </p>
+      )}
 
       <div className="mt-3 flex-1">
         <a

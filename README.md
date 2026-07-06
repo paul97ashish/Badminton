@@ -1,11 +1,12 @@
-# 🏸 Toronto Badminton Drop-in
+# 🏸 Toronto Drop-in Sports
 
-Find every badminton drop-in session at Toronto community centres — by date, zone, and age group — in one place.
+Find every drop-in sport and activity at Toronto community centres — badminton, basketball, swimming, pickleball, skating, fitness and more — by date, zone, and age group, in one place.
 
 **Live site:** [badminton.ashishpaul.ca](https://badminton.ashishpaul.ca)
 
 ## Features
 
+- **26 sports & activities** — court sports, swimming, skating, yoga, fitness and more, each at `/programs/<sport>/<date>`
 - **Daily schedules** — browse sessions for any date with a 7-day date strip
 - **Filters** — narrow by time of day, age group, and city zone; selections are stored in the URL, so they persist across days and can be shared as links
 - **List & map views** — flip to an interactive map of venues (Leaflet + OpenStreetMap); markers show session times on hover, and the view choice sticks while browsing
@@ -46,10 +47,12 @@ Key paths:
 ```
 src/
   app/
-    page.tsx                          # home page
-    programs/badminton/[date]/        # daily schedule page
+    page.tsx                          # home page with sport picker
+    programs/page.tsx                 # all sports with today's counts
+    programs/[sport]/[date]/          # daily schedule page per sport
   components/                         # header, cards, filters, date strip, map…
   lib/
+    sports.ts                         # sport catalog + course-title matching
     toronto-api.ts                    # City of Toronto open data client + joins
     filter-params.ts                  # URL <-> filter/view state
     format.ts                         # date/time/age formatting

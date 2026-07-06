@@ -4,7 +4,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { ReactNode, useEffect, useRef } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-import { BadmintonSession } from "@/lib/toronto-api";
+import { DropInSession } from "@/lib/toronto-api";
 import { formatTimeRange } from "@/lib/format";
 
 const markerIcon = new L.Icon({
@@ -73,10 +73,12 @@ function HoverMarker({
 
 export default function SessionsMap({
   sessions,
+  sportName,
 }: {
-  sessions: BadmintonSession[];
+  sessions: DropInSession[];
+  sportName: string;
 }) {
-  const byLocation = new Map<number, BadmintonSession[]>();
+  const byLocation = new Map<number, DropInSession[]>();
   for (const session of sessions) {
     if (session.location.lat === null || session.location.lng === null) continue;
     const list = byLocation.get(session.location.id) ?? [];
@@ -130,6 +132,8 @@ export default function SessionsMap({
                       session.endMinute
                     )}{" "}
                     · {session.ageLabel}
+                    {session.courseTitle !== sportName &&
+                      ` · ${session.courseTitle}`}
                   </li>
                 ))}
               </ul>

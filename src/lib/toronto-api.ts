@@ -1,3 +1,5 @@
+import { sportSlugForTitle } from "./sports";
+
 const CKAN_BASE = "https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/action";
 const DROPIN_RESOURCE_ID = "c99ec04f-4540-482c-9ee4-efb38774eab4";
 const LOCATIONS_RESOURCE_ID = "f23ac1ad-6f46-4b59-811f-eb34be9b1f7a";
@@ -49,9 +51,11 @@ interface FacilityGeoRecord {
 
 export type TimeOfDay = "morning" | "afternoon" | "evening";
 
-export interface BadmintonSession {
+export interface DropInSession {
   id: string;
   courseId: number;
+  sportSlug: string;
+  courseTitle: string;
   ageMin: number | null;
   ageMax: number | null;
   ageLabel: string;
@@ -153,42 +157,48 @@ async function getFacilityCoordinates(
   return coordsById;
 }
 
-export async function getBadmintonSessions(
+// All recognized drop-in sessions for a date, across every sport category.
+// One fetch per date serves every sport page via Next's fetch cache.
+export async function getSessionsForDate(
   date: string
-): Promise<BadmintonSession[]> {
+): Promise<DropInSession[]> {
   const dropInRecords = await datastoreSearch<DropInRecord>(
     DROPIN_RESOURCE_ID,
     {
-      filters: JSON.stringify({
-        "Course Title": "Badminton",
-        "First Date": date,
-      }),
-      limit: "1000",
+      filters: JSON.stringify({ "First Date": date }),
+      limit: "5000",
     }
   );
 
-  if (dropInRecords.length === 0) return [];
+  const recognized = dropInRecords
+    .map((record) => ({
+      record,
+      sportSlug: sportSlugForTitle(record["Course Title"]),
+    }))
+    .filter((r): r is { record: DropInRecord; sportSlug: string } =>
+      Boolean(r.sportSlug)
+    );
+
+  if (recognized.length === 0) return [];
 
   const locationIds = Array.from(
-    new Set(dropInRecords.map((r) => r["Location ID"]))
+    new Set(recognized.map((r) => r.record["Location ID"]))
   );
 
-  const locationRecords = await datastoreSearch<LocationRecord>(
-    LOCATIONS_RESOURCE_ID,
-    {
+  const [locationRecords, coordsById] = await Promise.all([
+    datastoreSearch<LocationRecord>(LOCATIONS_RESOURCE_ID, {
       filters: JSON.stringify({ "Location ID": locationIds }),
       limit: String(locationIds.length),
-    }
-  );
+    }),
+    getFacilityCoordinates(locationIds),
+  ]);
 
   const locationsById = new Map(
     locationRecords.map((loc) => [loc["Location ID"], loc])
   );
 
-  const coordsById = await getFacilityCoordinates(locationIds);
-
-  const sessions: BadmintonSession[] = dropInRecords
-    .map((record) => {
+  const sessions: DropInSession[] = recognized
+    .map(({ record, sportSlug }) => {
       const loc = locationsById.get(record["Location ID"]);
       if (!loc) return null;
 
@@ -196,9 +206,11 @@ export async function getBadmintonSessions(
       const mapQuery = encodeURIComponent(`${loc["Location Name"]} ${address} Toronto`);
       const coords = coordsById.get(loc["Location ID"]) ?? null;
 
-      const session: BadmintonSession = {
+      const session: DropInSession = {
         id: `${record.Course_ID}-${record["First Date"]}-${record["Start Hour"]}${record["Start Minute"]}`,
         courseId: record.Course_ID,
+        sportSlug,
+        courseTitle: record["Course Title"],
         ageMin: record["Age Min"] === "None" ? null : Number(record["Age Min"]),
         ageMax: record["Age Max"] === "None" ? null : Number(record["Age Max"]),
         ageLabel: formatAgeLabel(record["Age Min"], record["Age Max"]),
@@ -221,7 +233,7 @@ export async function getBadmintonSessions(
       };
       return session;
     })
-    .filter((s): s is BadmintonSession => s !== null);
+    .filter((s): s is DropInSession => s !== null);
 
   sessions.sort((a, b) => {
     const aMinutes = a.startHour * 60 + a.startMinute;
@@ -230,4 +242,23 @@ export async function getBadmintonSessions(
   });
 
   return sessions;
+}
+
+export async function getSportSessions(
+  sportSlug: string,
+  date: string
+): Promise<DropInSession[]> {
+  const all = await getSessionsForDate(date);
+  return all.filter((s) => s.sportSlug === sportSlug);
+}
+
+export async function getSportCounts(
+  date: string
+): Promise<Map<string, number>> {
+  const all = await getSessionsForDate(date);
+  const counts = new Map<string, number>();
+  for (const session of all) {
+    counts.set(session.sportSlug, (counts.get(session.sportSlug) ?? 0) + 1);
+  }
+  return counts;
 }

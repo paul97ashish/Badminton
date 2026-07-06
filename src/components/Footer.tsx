@@ -4,10 +4,10 @@ export default function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-xs">
           <p className="font-display text-base font-bold tracking-tight text-slate-900 dark:text-white">
-            🏸 Toronto Badminton Drop-in
+            🏸 Toronto Drop-in Sports
           </p>
           <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            Every badminton drop-in session at Toronto community centres, in
+            Every drop-in sport and activity at Toronto community centres, in
             one place.
           </p>
         </div>

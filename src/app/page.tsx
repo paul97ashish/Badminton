@@ -1,28 +1,10 @@
 import Link from "next/link";
 import DateSearchForm from "@/components/DateSearchForm";
-import { addDays, formatDateLong, todayDateString } from "@/lib/format";
-
-const FEATURES = [
-  {
-    icon: "📅",
-    title: "Fresh daily schedules",
-    body: "Every drop-in badminton session across Toronto community centres, pulled straight from the City's open data.",
-  },
-  {
-    icon: "🎯",
-    title: "Filter what matters",
-    body: "Narrow by time of day, age group, and city zone — your picks stay applied as you browse between days.",
-  },
-  {
-    icon: "🗺️",
-    title: "See venues on a map",
-    body: "Flip to map view to find the closest gym, with session times right in the marker popup.",
-  },
-];
+import { SPORTS } from "@/lib/sports";
+import { todayDateString } from "@/lib/format";
 
 export default function Home() {
   const today = todayDateString();
-  const tomorrow = addDays(today, 1);
 
   return (
     <>
@@ -36,55 +18,46 @@ export default function Home() {
             Live City of Toronto open data
           </p>
           <h1 className="mt-6 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-            Find a badminton court.
+            Pick a sport. Pick a day.
             <br />
             <span className="text-emerald-300">Just drop in.</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-emerald-100/80">
-            Every drop-in badminton session at Toronto community centres — by
-            date, zone, and age group. No registration digging required.
+            Every drop-in sport and activity at Toronto community centres —
+            badminton, basketball, swimming, pickleball, skating and more.
           </p>
 
-          <div className="mx-auto mt-8 max-w-lg">
+          <div className="mx-auto mt-8 max-w-2xl">
             <DateSearchForm />
-          </div>
-
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-sm">
-            <Link
-              href={`/programs/badminton/${today}`}
-              className="rounded-full bg-white/10 px-4 py-1.5 font-medium text-white ring-1 ring-white/20 transition hover:bg-white/20"
-            >
-              Today · {formatDateLong(today)}
-            </Link>
-            <Link
-              href={`/programs/badminton/${tomorrow}`}
-              className="rounded-full bg-white/10 px-4 py-1.5 font-medium text-white ring-1 ring-white/20 transition hover:bg-white/20"
-            >
-              Tomorrow
-            </Link>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 py-16">
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          {FEATURES.map((feature) => (
-            <div
-              key={feature.title}
-              className="rounded-xl border border-slate-900/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-slate-900"
+      <section className="mx-auto max-w-6xl px-4 py-14">
+        <h2 className="font-display text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Browse by sport
+        </h2>
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {SPORTS.map((sport) => (
+            <Link
+              key={sport.slug}
+              href={`/programs/${sport.slug}/${today}`}
+              className="group flex items-center gap-3 rounded-xl border border-slate-900/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-500/50 hover:shadow-md dark:border-white/10 dark:bg-slate-900 dark:hover:border-emerald-400/50"
             >
               <span className="text-2xl" aria-hidden>
-                {feature.icon}
+                {sport.emoji}
               </span>
-              <h2 className="mt-3 font-display font-bold text-slate-900 dark:text-white">
-                {feature.title}
-              </h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                {feature.body}
-              </p>
-            </div>
+              <span className="truncate font-display font-semibold text-slate-900 group-hover:text-emerald-700 dark:text-white dark:group-hover:text-emerald-400">
+                {sport.name}
+              </span>
+            </Link>
           ))}
         </div>
+        <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">
+          Filters for time of day, age group, and zone — plus a map view — are
+          on every sport page, and your picks stay applied as you browse
+          between days.
+        </p>
       </section>
     </>
   );

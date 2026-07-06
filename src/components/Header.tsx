@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { todayDateString } from "@/lib/format";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
@@ -11,9 +10,9 @@ export default function Header() {
             🏸
           </span>
           <span className="font-display text-lg font-bold tracking-tight text-slate-900 dark:text-white">
-            Toronto Badminton{" "}
+            Toronto{" "}
             <span className="font-medium text-emerald-700 dark:text-emerald-400">
-              Drop-in
+              Drop-in Sports
             </span>
           </span>
         </Link>
@@ -25,10 +24,10 @@ export default function Header() {
             Home
           </Link>
           <Link
-            href={`/programs/badminton/${todayDateString()}`}
+            href="/programs"
             className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-white shadow-sm transition hover:bg-emerald-700"
           >
-            Today&apos;s sessions
+            All programs
           </Link>
           <ThemeToggle />
         </nav>
