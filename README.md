@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏸 Toronto Badminton Drop-in
 
-## Getting Started
+Find every badminton drop-in session at Toronto community centres — by date, zone, and age group — in one place.
 
-First, run the development server:
+**Live site:** [badminton.ashishpaul.ca](https://badminton.ashishpaul.ca)
+
+## Features
+
+- **Daily schedules** — browse sessions for any date with a 7-day date strip
+- **Filters** — narrow by time of day, age group, and city zone; selections are stored in the URL, so they persist across days and can be shared as links
+- **List & map views** — flip to an interactive map of venues (Leaflet + OpenStreetMap); markers show session times on hover, and the view choice sticks while browsing
+- **Venue links** — every venue links to its official page on toronto.ca and to Google Maps
+- **Dark mode** — follows your system preference, with a manual toggle in the header
+
+## Data source
+
+All schedule data comes from the City of Toronto's open data portal (CKAN), fetched live at request time and cached for an hour:
+
+| Dataset | Used for |
+| --- | --- |
+| [Registered Programs and Drop In Courses Offering](https://open.toronto.ca/dataset/registered-programs-and-drop-in-courses-offering/) | Drop-in session times, age ranges (`Drop-in` tab) and venue names, addresses, districts (`Locations` tab) |
+| [Parks and Recreation Facilities](https://open.toronto.ca/dataset/parks-and-recreation-facilities/) | Venue coordinates for the map view |
+
+The datasets are joined by `Location ID`. The City refreshes the program data weekly; no API key is required.
+
+This site is **not affiliated with the City of Toronto**. Always confirm details with the community centre before attending.
+
+## Tech stack
+
+- [Next.js](https://nextjs.org/) (App Router) + TypeScript
+- [Tailwind CSS](https://tailwindcss.com/) v4
+- [React Leaflet](https://react-leaflet.js.org/) + OpenStreetMap for the map view
+- Deployed to [Cloudflare Workers](https://workers.cloudflare.com/) via [OpenNext](https://opennext.js.org/cloudflare)
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # local dev server at http://localhost:3000
+npm run lint       # ESLint
+npm run build      # production build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Key paths:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+  app/
+    page.tsx                          # home page
+    programs/badminton/[date]/        # daily schedule page
+  components/                         # header, cards, filters, date strip, map…
+  lib/
+    toronto-api.ts                    # City of Toronto open data client + joins
+    filter-params.ts                  # URL <-> filter/view state
+    format.ts                         # date/time/age formatting
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment
 
-## Learn More
+Pushes to `master` are built and deployed automatically by [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/) (build command `npx opennextjs-cloudflare build`, deploy command `npx wrangler deploy`).
 
-To learn more about Next.js, take a look at the following resources:
+To deploy manually instead:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+export CLOUDFLARE_API_TOKEN=...   # token with Workers Scripts: Edit
+npm run deploy
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`npm run preview` runs the production Worker build locally in the Workers runtime.
