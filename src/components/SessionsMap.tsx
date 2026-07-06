@@ -2,6 +2,7 @@
 
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { ReactNode, useEffect, useRef } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { BadmintonSession } from "@/lib/toronto-api";
 import { formatTimeRange } from "@/lib/format";
@@ -18,12 +19,57 @@ const markerIcon = new L.Icon({
 
 const TORONTO_CENTER: [number, number] = [43.6532, -79.3832];
 
-// Open on hover for mouse users; default click behaviour still covers touch.
-// No mouseout close — the popup must stay open so its venue link is clickable,
-// and Leaflet auto-closes it when another marker's popup opens.
-const hoverHandlers = {
-  mouseover: (e: L.LeafletMouseEvent) => (e.target as L.Marker).openPopup(),
-};
+// Grace period lets the cursor travel from the marker into the popup
+// (to click the venue link) without the popup closing mid-way.
+const CLOSE_DELAY_MS = 250;
+
+function HoverMarker({
+  position,
+  children,
+}: {
+  position: [number, number];
+  children: ReactNode;
+}) {
+  const markerRef = useRef<L.Marker>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelClose = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => {
+      markerRef.current?.closePopup();
+    }, CLOSE_DELAY_MS);
+  };
+
+  useEffect(() => cancelClose, []);
+
+  return (
+    <Marker
+      ref={markerRef}
+      position={position}
+      icon={markerIcon}
+      eventHandlers={{
+        mouseover: () => {
+          cancelClose();
+          markerRef.current?.openPopup();
+        },
+        mouseout: scheduleClose,
+      }}
+    >
+      <Popup>
+        <div onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
+          {children}
+        </div>
+      </Popup>
+    </Marker>
+  );
+}
 
 export default function SessionsMap({
   sessions,
@@ -61,37 +107,33 @@ export default function SessionsMap({
         {Array.from(byLocation.entries()).map(([locationId, group]) => {
           const { lat, lng, name, district, siteUrl } = group[0].location;
           return (
-            <Marker
+            <HoverMarker
               key={locationId}
               position={[lat as number, lng as number]}
-              icon={markerIcon}
-              eventHandlers={hoverHandlers}
             >
-              <Popup>
-                <a
-                  href={siteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold hover:underline"
-                >
-                  {name}
-                </a>
-                <p className="text-sm opacity-70">{district}</p>
-                <ul className="mt-1 space-y-0.5 text-sm">
-                  {group.map((session) => (
-                    <li key={session.id}>
-                      {formatTimeRange(
-                        session.startHour,
-                        session.startMinute,
-                        session.endHour,
-                        session.endMinute
-                      )}{" "}
-                      · {session.ageLabel}
-                    </li>
-                  ))}
-                </ul>
-              </Popup>
-            </Marker>
+              <a
+                href={siteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold hover:underline"
+              >
+                {name}
+              </a>
+              <p className="text-sm opacity-70">{district}</p>
+              <ul className="mt-1 space-y-0.5 text-sm">
+                {group.map((session) => (
+                  <li key={session.id}>
+                    {formatTimeRange(
+                      session.startHour,
+                      session.startMinute,
+                      session.endHour,
+                      session.endMinute
+                    )}{" "}
+                    · {session.ageLabel}
+                  </li>
+                ))}
+              </ul>
+            </HoverMarker>
           );
         })}
       </MapContainer>
