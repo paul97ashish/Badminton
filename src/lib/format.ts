@@ -11,7 +11,23 @@ export function formatTimeRange(
   endHour: number,
   endMinute: number
 ): string {
-  return `${formatTime(startHour, startMinute)} - ${formatTime(endHour, endMinute)}`;
+  const samePeriod =
+    (startHour >= 12 && endHour >= 12) || (startHour < 12 && endHour < 12);
+  if (samePeriod) {
+    const start = formatTime(startHour, startMinute).replace(/ (AM|PM)$/, "");
+    return `${start}–${formatTime(endHour, endMinute)}`;
+  }
+  return `${formatTime(startHour, startMinute)}–${formatTime(endHour, endMinute)}`;
+}
+
+export function formatAgeCompact(
+  ageMin: number | null,
+  ageMax: number | null
+): string {
+  if (ageMin !== null && ageMax !== null) return `Ages ${ageMin}–${ageMax}`;
+  if (ageMin !== null) return `Ages ${ageMin}+`;
+  if (ageMax !== null) return `Up to ${ageMax}`;
+  return "All ages";
 }
 
 export function parseDateStringLocal(date: string): Date {
@@ -34,6 +50,16 @@ export function todayDateString(): string {
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+export function formatWeekdayShort(date: string): string {
+  return parseDateStringLocal(date).toLocaleDateString("en-CA", {
+    weekday: "short",
+  });
+}
+
+export function formatDayOfMonth(date: string): number {
+  return parseDateStringLocal(date).getDate();
 }
 
 export function addDays(date: string, days: number): string {

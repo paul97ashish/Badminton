@@ -1,15 +1,31 @@
 import Link from "next/link";
+import { todayDateString } from "@/lib/format";
 
 export default function Header() {
   return (
-    <header className="border-b border-black/10 bg-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Link href="/" className="text-lg font-bold tracking-tight text-emerald-700">
-          🏸 Toronto Badminton Drop-in
+    <header className="sticky top-0 z-50 border-b border-slate-900/10 bg-white/85 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        <Link href="/" className="flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-lg shadow-sm">
+            🏸
+          </span>
+          <span className="font-display text-lg font-bold tracking-tight text-slate-900">
+            Toronto Badminton{" "}
+            <span className="font-medium text-emerald-700">Drop-in</span>
+          </span>
         </Link>
-        <nav className="flex gap-6 text-sm font-medium text-gray-600">
-          <Link href="/" className="hover:text-emerald-700">
+        <nav className="flex items-center gap-2 text-sm font-medium">
+          <Link
+            href="/"
+            className="rounded-lg px-3 py-1.5 text-slate-600 transition hover:bg-slate-900/5 hover:text-slate-900"
+          >
             Home
+          </Link>
+          <Link
+            href={`/programs/badminton/${todayDateString()}`}
+            className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-white shadow-sm transition hover:bg-emerald-700"
+          >
+            Today&apos;s sessions
           </Link>
         </nav>
       </div>

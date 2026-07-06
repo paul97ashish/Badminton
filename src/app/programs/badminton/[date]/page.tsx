@@ -27,10 +27,16 @@ export default async function BadmintonProgramsPage({
     <div className="mx-auto max-w-6xl px-4 py-8">
       <DateNav date={date} filterQueryString={filterQueryString} />
       {sessions.length === 0 ? (
-        <p className="text-gray-500">
-          No badminton drop-in sessions found for this date across Toronto
-          community centres.
-        </p>
+        <div className="rounded-xl border border-dashed border-slate-900/15 bg-white px-6 py-16 text-center">
+          <p className="text-3xl">🏸</p>
+          <p className="mt-3 font-display font-semibold text-slate-900">
+            No sessions scheduled for this date
+          </p>
+          <p className="mt-1 text-sm text-slate-500">
+            Schedules are typically published a few weeks ahead — try a nearby
+            day.
+          </p>
+        </div>
       ) : (
         <FilterableSessionList sessions={sessions} initialFilters={initialFilters} />
       )}

@@ -14,19 +14,22 @@ export default function DateSearchForm() {
         e.preventDefault();
         router.push(`/programs/badminton/${date}`);
       }}
-      className="flex flex-col gap-3 sm:flex-row"
+      className="flex flex-col gap-2 rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-900/10 sm:flex-row"
     >
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        className="w-full rounded-md border border-black/10 bg-white px-4 py-2.5 text-gray-900 sm:w-auto"
-      />
+      <label className="flex flex-1 items-center gap-3 rounded-xl px-4 py-2.5">
+        <span className="text-sm font-medium text-slate-400">Date</span>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full bg-transparent font-medium text-slate-900 outline-none"
+        />
+      </label>
       <button
         type="submit"
-        className="rounded-md bg-emerald-600 px-6 py-2.5 font-medium text-white hover:bg-emerald-700"
+        className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-emerald-700"
       >
-        Find badminton drop-in
+        Find sessions
       </button>
     </form>
   );

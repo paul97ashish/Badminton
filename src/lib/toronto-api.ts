@@ -106,6 +106,13 @@ function formatAgeLabel(ageMin: string, ageMax: string): string {
   return "All ages";
 }
 
+// The Locations dataset is inconsistent about this district's name;
+// both spellings refer to the same administrative district.
+function normalizeDistrict(district: string): string {
+  if (district === "Toronto East York") return "Toronto and East York";
+  return district;
+}
+
 function formatAddress(loc: LocationRecord): string {
   const parts = [
     loc["Street No"] !== "None" ? loc["Street No"] : "",
@@ -203,7 +210,7 @@ export async function getBadmintonSessions(
         location: {
           id: loc["Location ID"],
           name: loc["Location Name"],
-          district: loc.District,
+          district: normalizeDistrict(loc.District),
           address,
           mapUrl: `https://www.google.com/maps/search/?api=1&query=${mapQuery}`,
           lat: coords?.lat ?? null,

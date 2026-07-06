@@ -33,19 +33,20 @@ export default function SessionsMap({
 
   if (byLocation.size === 0) {
     return (
-      <p className="text-gray-500">
+      <p className="text-slate-500">
         No mappable locations for the current filters.
       </p>
     );
   }
 
   return (
-    <MapContainer
-      center={TORONTO_CENTER}
-      zoom={11}
-      scrollWheelZoom
-      style={{ height: "600px", width: "100%", borderRadius: "0.5rem" }}
-    >
+    <div className="isolate overflow-hidden rounded-xl border border-slate-900/10 shadow-sm">
+      <MapContainer
+        center={TORONTO_CENTER}
+        zoom={11}
+        scrollWheelZoom
+        style={{ height: "600px", width: "100%" }}
+      >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -74,6 +75,7 @@ export default function SessionsMap({
           </Marker>
         );
       })}
-    </MapContainer>
+      </MapContainer>
+    </div>
   );
 }
